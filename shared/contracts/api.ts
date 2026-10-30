@@ -14,6 +14,7 @@ export const CRAWL_ROUTE_SEGMENTS = {
 	resume: "/:id/resume",
 	snapshot: "/:id/snapshot",
 	pages: "/:id/pages",
+	graph: "/:id/graph",
 	pageContent: "/:id/pages/:pageId/content",
 	export: "/:id/export",
 	events: "/:id/events",

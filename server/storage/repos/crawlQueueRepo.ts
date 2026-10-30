@@ -27,6 +27,9 @@ export function createCrawlQueueRepo(db: Database) {
 			crawl_id, url, depth, retries, parent_url, domain, available_at
 		) VALUES (?, ?, ?, ?, ?, ?, ?)
 	`);
+	const insertGraphEdge = db.prepare<never, [string, string, string, number]>(
+		"INSERT INTO crawl_graph_edges (crawl_id, source_url, target_url, depth) VALUES (?, ?, ?, ?)",
+	);
 	const updateItem = db.prepare<
 		never,
 		[number, number, string | null, string, number, string, string]
@@ -62,6 +65,9 @@ export function createCrawlQueueRepo(db: Database) {
 				item.domain,
 				item.availableAt,
 			);
+			if (item.parentUrl) {
+				insertGraphEdge.run(crawlId, item.parentUrl, item.url, item.depth);
+			}
 		}
 	});
 

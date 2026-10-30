@@ -240,3 +240,38 @@ dialog select {
 .crawl-readouts .cute-badge + .cute-badge {
 	border-left: 1px solid var(--miku-border);
 }
+
+/* Articulated spider movement follows actual stored page changes, not a timer. */
+.crawl-spider-legs-left,
+.crawl-spider-legs-right {
+	transform-box: fill-box;
+	transform-origin: center;
+}
+.crawl-spider-legs-active .crawl-spider-legs-left {
+	animation: crawl-spider-step-left 420ms ease-in-out infinite alternate;
+}
+.crawl-spider-legs-active .crawl-spider-legs-right {
+	animation: crawl-spider-step-right 420ms ease-in-out infinite alternate;
+}
+@keyframes crawl-spider-step-left {
+	from {
+		transform: rotate(-12deg) translateY(-1px);
+	}
+	to {
+		transform: rotate(11deg) translateY(1px);
+	}
+}
+@keyframes crawl-spider-step-right {
+	from {
+		transform: rotate(12deg) translateY(1px);
+	}
+	to {
+		transform: rotate(-11deg) translateY(-1px);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.crawl-spider-legs-active .crawl-spider-legs-left,
+	.crawl-spider-legs-active .crawl-spider-legs-right {
+		animation: none;
+	}
+}

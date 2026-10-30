@@ -4,6 +4,7 @@ import path from "node:path";
 import { config } from "../config/env.js";
 import { DurableStorageBudget } from "./DurableStorageBudget.js";
 import { createCrawlDomainStateRepo } from "./repos/crawlDomainStateRepo.js";
+import { createCrawlGraphRepo } from "./repos/crawlGraphRepo.js";
 import { createCrawlItemPersistence } from "./repos/crawlItemPersistence.js";
 import { createCrawlQueueRepo } from "./repos/crawlQueueRepo.js";
 import { createCrawlRunRepo } from "./repos/crawlRunRepo.js";
@@ -11,9 +12,11 @@ import { createPageRepo } from "./repos/pageRepo.js";
 import { createSearchRepo } from "./repos/searchRepo.js";
 
 const schemaPath = path.join(import.meta.dir, "schema.sql");
+const graphSchemaPath = path.join(import.meta.dir, "graph.sql");
 
 export interface StorageRepos {
 	crawlRuns: ReturnType<typeof createCrawlRunRepo>;
+	graph: ReturnType<typeof createCrawlGraphRepo>;
 	crawlQueue: ReturnType<typeof createCrawlQueueRepo>;
 	crawlItems: ReturnType<typeof createCrawlItemPersistence>;
 	crawlDomainState: ReturnType<typeof createCrawlDomainStateRepo>;
@@ -144,7 +147,9 @@ function resetSchema(db: Database, schemaSql: string): void {
 }
 
 function openCurrentDatabase(databasePath: string): Database {
-	const schemaSql = readFileSync(schemaPath, "utf8");
+	const previousSchemaSql = readFileSync(schemaPath, "utf8");
+	const graphSql = readFileSync(graphSchemaPath, "utf8");
+	const schemaSql = `${previousSchemaSql}\n${graphSql}`;
 	const db = openDatabase(databasePath);
 	try {
 		if (describeSchema(db).length === 0) {
@@ -152,6 +157,12 @@ function openCurrentDatabase(databasePath: string): Database {
 			return db;
 		}
 		if (hasCurrentSchema(db, schemaSql)) return db;
+		// Only the precisely matching pre-graph schema gets a lossless additive upgrade.
+		// All other incompatible schemas retain the existing reset behavior.
+		if (hasCurrentSchema(db, previousSchemaSql)) {
+			db.transaction(() => db.exec(graphSql))();
+			return db;
+		}
 		resetSchema(db, schemaSql);
 		return db;
 	} catch (error) {
@@ -179,6 +190,7 @@ export function createStorage(
 			}),
 			repos: {
 				crawlRuns: createCrawlRunRepo(db, crawlQueue),
+				graph: createCrawlGraphRepo(db),
 				crawlQueue,
 				crawlItems: createCrawlItemPersistence(db, pages),
 				crawlDomainState: createCrawlDomainStateRepo(db),

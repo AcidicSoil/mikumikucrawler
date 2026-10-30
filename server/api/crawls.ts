@@ -8,6 +8,7 @@ import {
 	isCrawlOptions,
 } from "../../shared/contracts/index.js";
 import {
+	CrawlGraphResponseSchema,
 	CrawlIdParamsSchema,
 	CrawlListResponseSchema,
 	CrawlPagesResponseSchema,
@@ -113,6 +114,14 @@ export function crawlsApi(services: RouteServicesPlugin) {
 						detail: crawlsTag("Recover crawl lifecycle and durable page state"),
 					},
 					({ crawl, repos }) => createCrawlRecoverySnapshot(crawl, repos),
+				)
+				.get(
+					CRAWL_ROUTE_SEGMENTS.graph,
+					{
+						response: { 200: CrawlGraphResponseSchema, 404: ApiErrorSchema, 422: ApiErrorSchema },
+						detail: crawlsTag("Recover durable admitted parent-child crawl relationships"),
+					},
+					({ crawl, repos }) => repos.graph.list(crawl.id),
 				)
 				.get(
 					CRAWL_ROUTE_SEGMENTS.pages,

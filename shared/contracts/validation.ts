@@ -3,6 +3,7 @@ import { Value } from "typebox/value";
 import type { CrawlMethod } from "../crawl.js";
 import type {
 	CrawlCounters,
+	CrawlGraphResponse,
 	CrawlOptions,
 	CrawlRecoverySnapshot,
 	CrawlSummary,
@@ -14,6 +15,7 @@ import type { CrawlPageData, CrawlPageDetails, PageContentResponse } from "./pag
 import {
 	CrawlCountersSchema,
 	CrawlEventEnvelopeSchema,
+	CrawlGraphResponseSchema,
 	CrawlOptionsSchema,
 	CrawlPageDataSchema,
 	CrawlPageDetailsSchema,
@@ -52,6 +54,10 @@ export function hasValidCrawlCounterIdentity(counters: CrawlCounters): boolean {
 	return (
 		counters.pagesScanned === counters.successCount + counters.failureCount + counters.skippedCount
 	);
+}
+
+export function isCrawlGraphResponse(value: unknown): value is CrawlGraphResponse {
+	return check(CrawlGraphResponseSchema, value) && value.count === value.edges.length;
 }
 
 export function isCrawlCounters(value: unknown): value is CrawlCounters {

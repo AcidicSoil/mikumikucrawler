@@ -2,6 +2,7 @@ import type { Static } from "typebox";
 import { isOneOf } from "../isOneOf.js";
 import type {
 	CrawlCountersSchema,
+	CrawlGraphResponseSchema,
 	CrawlOptionsSchema,
 	CrawlRecoverySnapshotSchema,
 	CrawlSummarySchema,
@@ -70,6 +71,7 @@ export function createEmptyCrawlCounters(): CrawlCounters {
 
 export type CrawlSummary = Static<typeof CrawlSummarySchema>;
 export type CrawlRecoverySnapshot = Static<typeof CrawlRecoverySnapshotSchema>;
+export type CrawlGraphResponse = Static<typeof CrawlGraphResponseSchema>;
 export type ResumableCrawlListResponse = Static<typeof ResumableCrawlListResponseSchema>;
 
 export interface ResumableSessionSummary {

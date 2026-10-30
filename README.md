@@ -188,6 +188,44 @@ beacons, and other methods stay read-only (`GET`/`HEAD`).
 
 ---
 
+## Durable crawl map
+
+Successful queue admissions now preserve parent-child relationships in SQLite
+`crawl_graph_edges`. These records survive queue completion and pause/resume,
+are deleted with their crawl, and are available from
+`GET /api/crawls/:id/graph`. The response contains
+`{ edges: [{ source, target, depth }], count }`.
+The edge list is bounded by the existing maximum page count (200).
+
+Edges represent **accepted traversal paths**, not every hyperlink in the HTML.
+Rejected URLs, blocked destinations, and duplicate queue admissions are not
+misrepresented as visited links. This is an admitted traversal tree, not yet a
+complete hyperlink graph.
+
+The live Crawl map renders at most 40 nodes at a time and reports the number
+omitted. Its eight-legged SVG spider tracks the **most recently stored page**,
+not a speculative in-flight request. Updates are coalesced before requesting
+another graph snapshot. The component supports keyboard selection of visible
+pages and reduced-motion preferences.
+
+Existing databases matching the immediately preceding schema receive a
+lossless, additive graph-table migration. Other incompatible schema versions
+retain the pre-existing reset behavior; **back up valuable databases before
+upgrading from older releases**.
+
+To reproduce the crawler, database, event, and browser verification:
+
+```bash
+bun install --frozen-lockfile --ignore-scripts
+bun run build
+python3 scripts/verify-local-crawl.py
+bun scripts/verify-crawl-graph-browser.mjs
+```
+
+The browser check uses a disposable local target, a temporary database, and
+headless Chrome at `/usr/bin/google-chrome`. It writes an ignored screenshot
+to `tmp/crawl-graph-browser.png` and does not access a public website.
+
 ## 🔌 API
 
 > API documentation (the interactive `/openapi` UI and its `/openapi/json` specification) is served in development only.

@@ -1,6 +1,7 @@
 import type {
 	CrawlEventEnvelope,
 	CrawlExportFormat,
+	CrawlGraphResponse,
 	CrawlOptions,
 	CrawlRecoverySnapshot,
 	CrawlSummary,
@@ -9,6 +10,7 @@ import type {
 } from "../../shared/contracts/index.js";
 import {
 	CrawlEventTypeValues,
+	isCrawlGraphResponse,
 	isCrawlRecoverySnapshot,
 	isCrawlSummary,
 	isDeleteCrawlResponse,
@@ -76,6 +78,19 @@ export async function getCrawlRecoverySnapshot(
 		response,
 		crawlRecoverySnapshotContract(crawlId, CRAWL_RECOVERY_RESPONSE_MESSAGES),
 	);
+}
+
+/** Recover admitted crawl edges, including edges whose queue items have completed. */
+export async function getCrawlGraph(
+	crawlId: string,
+	lifetimeSignal?: AbortSignal,
+): Promise<ApiResult<CrawlGraphResponse>> {
+	const signal = createRequestSignal(lifetimeSignal);
+	const response = await api.api.crawls({ id: crawlId }).graph.get({ fetch: { signal } });
+	return unwrapApiResponse(response, {
+		isValid: isCrawlGraphResponse,
+		invalidMessage: "Unexpected crawl graph response",
+	});
 }
 
 export async function stopCrawl(

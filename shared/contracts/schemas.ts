@@ -177,6 +177,18 @@ export const CrawlPagesResponseSchema = t.Object({
 	count: nonNegativeInteger(),
 });
 
+/** Each edge represents a successful queued child, not every page hyperlink. */
+export const CrawlGraphEdgeSchema = t.Object({
+	source: t.String({ maxLength: MAX_URL_LENGTH }),
+	target: t.String({ maxLength: MAX_URL_LENGTH }),
+	depth: t.Integer({ minimum: 1, maximum: CRAWL_OPTION_BOUNDS.crawlDepth.max }),
+});
+
+export const CrawlGraphResponseSchema = t.Object({
+	edges: t.Array(CrawlGraphEdgeSchema, { maxItems: CRAWL_OPTION_BOUNDS.maxPages.max }),
+	count: nonNegativeInteger(),
+});
+
 export const CrawlRecoverySnapshotSchema = t.Object({
 	crawl: CrawlSummarySchema,
 	pages: t.Array(CrawlPageSummarySchema, { maxItems: CRAWL_PAGE_SNAPSHOT_LIMIT }),

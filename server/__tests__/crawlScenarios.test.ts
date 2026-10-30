@@ -157,6 +157,15 @@ describe("crawl scenarios", () => {
 		expect(sequences).toEqual(sequences.map((_, index) => (sequences[0] ?? 0) + index));
 		expect(events.at(-1)?.type).toBe("crawl.completed");
 		expect(completed?.eventSequence).toBe(events.at(-1)?.sequence);
+		const graph = storage.repos.graph.list(crawlId);
+		expect(graph.count).toBeGreaterThan(0);
+		expect(graph.edges).toContainEqual({
+			source: `${SITE}/`,
+			target: `${SITE}/a`,
+			depth: 1,
+		});
+		expect(graph.edges.every((edge) => !edge.target.includes("/private"))).toBe(true);
+		expect(graph.edges.every((edge) => !edge.target.includes("/sponsored"))).toBe(true);
 		expect(storage.repos.crawlQueue.listPending(crawlId)).toEqual([]);
 	}, 30_000);
 

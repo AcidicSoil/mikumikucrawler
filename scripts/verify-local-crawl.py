@@ -161,6 +161,8 @@ def main():
                 assert final and final["status"] == "completed", final
                 done.wait(3)
                 snapshot = fetch_json(base + f"/api/crawls/{crawl_id}/snapshot")
+                graph = fetch_json(base + f"/api/crawls/{crawl_id}/graph")
+                assert graph == {"edges": [], "count": 0}, graph
                 assert snapshot["pageCount"] == 1, snapshot
                 assert len(snapshot["pages"]) == 1, snapshot
                 # This backend intentionally owns an exclusive SQLite lock while

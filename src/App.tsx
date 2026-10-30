@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ActionButtons } from "./components/ActionButtons";
 import { CrawlerForm } from "./components/CrawlerForm";
+import { CrawlGraph } from "./components/CrawlGraph";
 import { MikuBanner } from "./components/MikuBanner";
 import { ProgressBar } from "./components/ProgressBar";
 import { StatsGrid } from "./components/StatsGrid";
@@ -284,6 +285,14 @@ function App() {
 							<ProgressBar progress={progress} runPhase={runPhase} />
 						</div>
 					</section>
+
+					<CrawlGraph
+						crawlId={activeCrawlId}
+						target={activeCrawlOptions?.target ?? target}
+						revision={storedPageCount}
+						pages={crawledPages}
+						isRunning={isAttacking}
+					/>
 
 					<ActionButtons
 						storedPageCount={storedPageCount}
